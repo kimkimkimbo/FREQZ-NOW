@@ -9,6 +9,21 @@ const CameraScreen = ({ onCaptureComplete }) => {
     const [countdown, setCountdown] = useState(null);
     const [isFlashing, setIsFlashing] = useState(false);
 
+    // [추가/수정] 비디오의 실제 해상도를 저장할 상태 추가 (기본값 설정)
+    const [videoDimensions, setVideoDimensions] = useState({ width: 640, height: 480 });
+
+    // [추가] 비디오 메타데이터 로드 완료 시 실행되는 핸들러: 실제 해상도를 가져와 상태 업데이트
+    const handleVideoLoaded = () => {
+        if (videoRef.current) {
+            const width = videoRef.current.videoWidth;
+            const height = videoRef.current.videoHeight;
+            // 실제 스트림 해상도로 캔버스 내부 해상도를 동적 설정
+            setVideoDimensions({ width, height });
+            console.log(`Video stream loaded: ${width}x${height}`);
+        }
+    };
+
+
     // Start Webcam
     useEffect(() => {
         // 모바일 대응을 위해 facingMode: 'user' (전면 카메라) 추가 권장
@@ -29,14 +44,21 @@ const CameraScreen = ({ onCaptureComplete }) => {
     }, []);
 
     // Real-time Filter Loop
+    // [수정] videoDimensions가 변경될 때마다 루프를 재시작하여 새 해상도를 적용합니다.
     useEffect(() => {
         let animationFrameId;
 
         const render = () => {
             if (videoRef.current && canvasRef.current && videoRef.current.readyState === 4) {
                 const ctx = canvasRef.current.getContext('2d');
-                const width = canvasRef.current.width;
-                const height = canvasRef.current.height;
+
+                // [수정] 캔버스 내부 해상도를 동적 상태에서 가져옴
+                const { width, height } = videoDimensions;
+
+                if (width === 0 || height === 0) { // 스트림이 로드되지 않았으면 그리지 않음
+                    animationFrameId = requestAnimationFrame(render);
+                    return;
+                }
 
                 // 거울 모드 (좌우 반전) - 셀카 찍을 때 자연스럽게
                 ctx.save();
@@ -53,7 +75,7 @@ const CameraScreen = ({ onCaptureComplete }) => {
         render();
 
         return () => cancelAnimationFrame(animationFrameId);
-    }, []);
+    }, [videoDimensions]); // 의존성 배열에 videoDimensions 추가
 
     const takePhoto = () => {
         if (photos.length >= 4) return;
@@ -78,6 +100,7 @@ const CameraScreen = ({ onCaptureComplete }) => {
             setIsFlashing(true);
             setTimeout(() => setIsFlashing(false), 150);
 
+            // 캔버스 내부 해상도가 동적으로 설정되었으므로 찌그러지지 않은 이미지가 저장됨
             const dataUrl = canvasRef.current.toDataURL('image/jpeg', 0.8);
             const newPhotos = [...photos, dataUrl];
             setPhotos(newPhotos);
@@ -143,8 +166,16 @@ const CameraScreen = ({ onCaptureComplete }) => {
 
                     borderRadius: '4px', // 화면 모서리가 둥글다면 추가
                 }}>
-                    <video ref={videoRef} style={{ display: 'none' }} />
-                    <canvas ref={canvasRef} width={640} height={480} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    {/* [수정] onLoadedData 핸들러 추가 */}
+                    <video ref={videoRef} onLoadedData={handleVideoLoaded} style={{ display: 'none' }} />
+
+                    {/* [수정] 캔버스 width/height를 동적 상태로 연결 */}
+                    <canvas
+                        ref={canvasRef}
+                        width={videoDimensions.width}
+                        height={videoDimensions.height}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
 
                     {/* 카운트다운 */}
                     {countdown && (
@@ -176,7 +207,7 @@ const CameraScreen = ({ onCaptureComplete }) => {
                 gap: '20px',
                 zIndex: 30
             }}>
-                {/* 귀여운 스냅 버튼 디자인 */}
+                { }
                 <button
                     onClick={takePhoto}
                     disabled={photos.length >= 4 || countdown !== null}
