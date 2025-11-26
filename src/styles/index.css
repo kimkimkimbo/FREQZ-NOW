@@ -1,0 +1,71 @@
+@font-face {
+  font-family: 'BookkMyungjo';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2302@1.0/BookkMyungjo-Lt.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'BookkMyungjo';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2302@1.0/BookkMyungjo-Bd.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+}
+
+:root {
+  /* Color Palette - Christmas & Burgundy */
+  --color-bg-main: #990011;
+  --color-text-main: #FCF6F5;
+
+  /* Frame Colors */
+  --color-frame-bg: #9E1030;
+  --color-frame-text: #e9877e;
+
+  /* Legacy/Accent (kept for compatibility or accents) */
+  --color-pink-pastel: #FFD1DC;
+  --color-pink-hot: #FF69B4;
+  --color-lavender: #E6E6FA;
+
+  /* Fonts */
+  --font-main: 'BookkMyungjo', serif;
+  --font-pixel: 'Courier New', Courier, monospace;
+
+  /* Spacing */
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--color-bg-main);
+  color: var(--color-text-main);
+  font-family: var(--font-main);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+#root {
+  width: 100%;
+  max-width: 600px;
+  /* Mobile-first constraint */
+  margin: 0 auto;
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+}
