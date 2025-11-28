@@ -100,10 +100,10 @@ const ResultScreen = ({ photos, onRestart }) => {
 
     // Draw Footer Text
     ctx.fillStyle = '#e9877e'; // Frame Text Color
-    // [수정] 폰트 크기도 DPI_SCALE에 맞춰 커지므로, CSS 기준 크기(45px)를 사용합니다.
+    // 폰트 크기도 DPI_SCALE에 맞춰 커지므로, CSS 기준 크기(45px)를 사용합니다.
     ctx.font = '45px BookkMyungjo';
     ctx.textAlign = 'center';
-    // [수정] 위치도 CSS 기준 크기 (cssTotalWidth / 2, cssTotalHeight - 40)를 사용합니다.
+    // 위치도 CSS 기준 크기 (cssTotalWidth / 2, cssTotalHeight - 40)를 사용합니다.
     ctx.fillText('FREQZ', cssTotalWidth / 2, cssTotalHeight - 40);
 
     const finalImage = canvas.toDataURL('image/png');
@@ -112,8 +112,37 @@ const ResultScreen = ({ photos, onRestart }) => {
 
   return (
     <div className="result-screen" style={{ textAlign: 'center', paddingBottom: '50px', color: 'var(--color-text-main)' }}>
-      <h4 style={{ color: 'var(--color-text-main)', marginBottom: '20px' }}>12월, 웹에서 가장 먼저 FREQZ light를 만나보세요!</h4>
-      <h4 style={{ color: 'var(--color-text-main)', marginBottom: '20px' }}>Experience FREQZ light for the first time in December!</h4>
+      <h4 style={{ color: 'var(--color-text-main)', marginBottom: '20px' }}>FREQZ 출시를 앞두고, <br /> 먼저 핵심 기능만 들어간 FREQZ light를 선보입니다.</h4>
+      <h4 style={{ color: 'var(--color-text-main)', marginBottom: '20px' }}>Ahead of the full FREQZ launch, <br />we're introducing FREQZ light with only the core features </h4>
+
+      <h4 style={{ color: 'var(--color-text-main)', marginBottom: '20px' }}>전혀 안 궁금 한 그 사람부터 너무 궁금 한 그 사람의 음악까지!</h4>
+      <h4 style={{ color: 'var(--color-text-main)', marginBottom: '20px' }}>From people you have zero interest in to those you're dying to know about - discover their music!</h4>
+
+      <h4 style={{ color: 'var(--color-text-main)', marginBottom: '20px' }}>더 나은 FREQZ를 위해, 설문에 참여해 주세요!</h4>
+      <h4 style={{ color: 'var(--color-text-main)', marginBottom: '20px' }}>For a better FREQZ - join our survey!</h4>
+
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+        <a href="https://forms.gle/oGhc27JM97CqJgXk9" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+          <button style={{
+            background: 'rgba(0,0,0,0.5)',
+            border: '1px solid white',
+            color: 'white',
+            //borderRadius: '50%',
+            width: '100px',
+            height: '40px',
+            fontSize: '24px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: 'bold',
+            marginBottom: '30px',
+          }}>
+            Survey
+          </button>
+        </a>
+      </div>
+
 
       {/* Preview (Visual only) */}
       <div style={{
