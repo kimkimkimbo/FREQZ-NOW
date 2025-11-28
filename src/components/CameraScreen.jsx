@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { applyVintageFilter } from './FilterEngine';
-import cameraOverlay from '../assets/c_img.png';
+import { applyVintageFilter } from './FilterEngine'; // FilterEngine이 있다고 가정
+import cameraOverlay from '../assets/c_img.png'; // 카메라 이미지 경로
 
 const CameraScreen = ({ onCaptureComplete }) => {
     const videoRef = useRef(null);
@@ -9,15 +9,14 @@ const CameraScreen = ({ onCaptureComplete }) => {
     const [countdown, setCountdown] = useState(null);
     const [isFlashing, setIsFlashing] = useState(false);
 
-    // [추가/수정] 비디오의 실제 해상도를 저장할 상태 추가 (기본값 설정)
+    // 비디오의 실제 해상도를 저장할 상태 추가
     const [videoDimensions, setVideoDimensions] = useState({ width: 640, height: 480 });
 
-    // [추가] 비디오 메타데이터 로드 완료 시 실행되는 핸들러: 실제 해상도를 가져와 상태 업데이트
+    // 비디오 메타데이터 로드 완료 시 실행되는 핸들러: 실제 해상도를 가져와 상태 업데이트
     const handleVideoLoaded = () => {
         if (videoRef.current) {
             const width = videoRef.current.videoWidth;
             const height = videoRef.current.videoHeight;
-            // 실제 스트림 해상도로 캔버스 내부 해상도를 동적 설정
             setVideoDimensions({ width, height });
             console.log(`Video stream loaded: ${width}x${height}`);
         }
@@ -26,10 +25,9 @@ const CameraScreen = ({ onCaptureComplete }) => {
 
     // Start Webcam
     useEffect(() => {
-        // 모바일 대응을 위해 facingMode: 'user' (전면 카메라) 추가 권장
         navigator.mediaDevices.getUserMedia({
             video: {
-                width: { ideal: 1280 }, // 해상도를 조금 높임
+                width: { ideal: 1280 }, // 고화질 요청
                 height: { ideal: 720 },
                 facingMode: 'user'
             }
@@ -44,7 +42,6 @@ const CameraScreen = ({ onCaptureComplete }) => {
     }, []);
 
     // Real-time Filter Loop
-    // [수정] videoDimensions가 변경될 때마다 루프를 재시작하여 새 해상도를 적용합니다.
     useEffect(() => {
         let animationFrameId;
 
@@ -52,15 +49,14 @@ const CameraScreen = ({ onCaptureComplete }) => {
             if (videoRef.current && canvasRef.current && videoRef.current.readyState === 4) {
                 const ctx = canvasRef.current.getContext('2d');
 
-                // [수정] 캔버스 내부 해상도를 동적 상태에서 가져옴
                 const { width, height } = videoDimensions;
 
-                if (width === 0 || height === 0) { // 스트림이 로드되지 않았으면 그리지 않음
+                if (width === 0 || height === 0) {
                     animationFrameId = requestAnimationFrame(render);
                     return;
                 }
 
-                // 거울 모드 (좌우 반전) - 셀카 찍을 때 자연스럽게
+                // 거울 모드 (좌우 반전)
                 ctx.save();
                 ctx.scale(-1, 1);
                 ctx.drawImage(videoRef.current, -width, 0, width, height);
@@ -75,7 +71,7 @@ const CameraScreen = ({ onCaptureComplete }) => {
         render();
 
         return () => cancelAnimationFrame(animationFrameId);
-    }, [videoDimensions]); // 의존성 배열에 videoDimensions 추가
+    }, [videoDimensions]);
 
     const takePhoto = () => {
         if (photos.length >= 4) return;
@@ -95,13 +91,55 @@ const CameraScreen = ({ onCaptureComplete }) => {
         }, 1000);
     };
 
+    // 📸 [최종 캡처 로직]: 뷰파인더 비율 그대로 캡처 (여백 없음)
     const captureFrame = () => {
         if (canvasRef.current) {
             setIsFlashing(true);
             setTimeout(() => setIsFlashing(false), 150);
 
-            // 캔버스 내부 해상도가 동적으로 설정되었으므로 찌그러지지 않은 이미지가 저장됨
-            const dataUrl = canvasRef.current.toDataURL('image/jpeg', 0.8);
+            const { width: streamWidth, height: streamHeight } = videoDimensions;
+
+            // 1. 뷰파인더의 비율 (CSS 기반)
+            const CSS_VIEW_WIDTH_PERCENT = 74;
+            const CSS_VIEW_HEIGHT_PERCENT = 50;
+            const VIEWFINDER_ASPECT = CSS_VIEW_WIDTH_PERCENT / CSS_VIEW_HEIGHT_PERCENT; // 1.48
+
+            // 2. 캡처 해상도를 뷰파인더 비율(1.48)에 맞춰 설정 (여백 없애기)
+            const CAPTURE_HEIGHT = 720;
+            const CAPTURE_WIDTH = Math.round(CAPTURE_HEIGHT * VIEWFINDER_ASPECT); // 1066px
+
+            const captureCanvas = document.createElement('canvas');
+            const captureCtx = captureCanvas.getContext('2d');
+            captureCanvas.width = CAPTURE_WIDTH;
+            captureCanvas.height = CAPTURE_HEIGHT;
+
+            // 3. 원본 캔버스에서 뷰파인더 비율(1.48)에 해당하는 영역을 추출 (중앙 크롭)
+            let sourceX = 0;
+            let sourceY = 0;
+            let sourceWidth = streamWidth;
+            let sourceHeight = streamHeight;
+
+            const streamAspect = streamWidth / streamHeight;
+
+            if (streamAspect > VIEWFINDER_ASPECT) {
+                // 스트림(16:9)이 뷰파인더(1.48)보다 넓으므로 -> 좌우를 잘라냄
+                sourceWidth = streamHeight * VIEWFINDER_ASPECT;
+                sourceX = (streamWidth - sourceWidth) / 2;
+            } else {
+                // 스트림이 뷰파인더보다 좁거나 같으므로 -> 상하를 잘라냄
+                sourceHeight = streamWidth / VIEWFINDER_ASPECT;
+                sourceY = (streamHeight - sourceHeight) / 2;
+            }
+
+            // 4. 잘라낸 소스 영역을 최종 캡처 캔버스에 여백 없이 꽉 채워 그립니다.
+            captureCtx.drawImage(
+                canvasRef.current,
+                sourceX, sourceY, sourceWidth, sourceHeight, // 소스 영역 (원본 캔버스)
+                0, 0, CAPTURE_WIDTH, CAPTURE_HEIGHT          // 타겟 영역 (최종 캡처 캔버스)
+            );
+
+            // 최종 dataUrl 사용
+            const dataUrl = captureCanvas.toDataURL('image/jpeg', 0.8);
             const newPhotos = [...photos, dataUrl];
             setPhotos(newPhotos);
 
@@ -111,6 +149,7 @@ const CameraScreen = ({ onCaptureComplete }) => {
         }
     };
 
+    // --- 렌더링 부분 ---
     return (
         <div className="camera-screen" style={{
             position: 'relative',
@@ -120,56 +159,55 @@ const CameraScreen = ({ onCaptureComplete }) => {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center', // 화면 세로 중앙 정렬
-            backgroundColor: 'var(--color-bg-main)', // 배경색 확보
+            backgroundColor: 'var(--color-bg-main)',
             overflow: 'hidden'
         }}>
 
-            {/* --- [1] 카메라 프레임 컨테이너 --- */}
+            {/* --- 카메라 프레임 컨테이너 --- */}
             <div style={{
                 position: 'relative',
                 width: '100%',
-                maxWidth: '600px', // [수정 포인트] 이미지 최대 크기 (모바일에서는 화면 꽉 참)
-                padding: '20px', // 좌우 여백 확보
-                boxSizing: 'border-box'
+                maxWidth: '600px',
+                padding: '20px',
+                boxSizing: 'border-box',
+                // 👇 [수정됨]: vh 단위로 변경하여 기종별 높이 차이를 보정합니다.
+                marginTop: '5vh'
             }}>
 
-                {/* A. 프레임 이미지 (가장 앞쪽) */}
+                {/* 프레임 이미지 (가장 앞쪽) */}
                 <img
                     src={cameraOverlay}
                     alt="Camera Frame"
                     style={{
                         position: 'relative',
-                        zIndex: 20, // 비디오보다 위에 있어야 함 (투명한 부분으로 비디오가 보임)
-                        width: '100%', // 부모 컨테이너에 맞춤
+                        zIndex: 20,
+                        width: '100%',
                         display: 'block',
                         pointerEvents: 'none',
-                        filter: 'drop-shadow(0px 10px 20px rgba(0,0,0,0.3))' // 약간의 그림자로 입체감
+                        filter: 'drop-shadow(0px 10px 20px rgba(0,0,0,0.3))'
                     }}
                 />
 
                 {/* B. 비디오 화면 (이미지 뒤쪽 혹은 구멍 위치) */}
                 <div style={{
                     position: 'absolute',
-                    zIndex: 10, // 이미지보다 뒤에 위치
+                    zIndex: 10,
                     backgroundColor: '#000',
                     overflow: 'hidden',
 
-                    // ▼▼▼▼▼ [위치 및 크기 미세 조정 구역] ▼▼▼▼▼
-                    // c_img.png의 투명한 화면 영역에 맞춰서 아래 % 숫자를 조정하세요.
+                    // ▼▼▼▼▼ [CSS 위치 및 크기 유지] ▼▼▼▼▼
+                    top: '30.5%',      // 이미지 상단 위치
+                    left: '18.5%',     // 이미지 왼쪽 위치
+                    width: '44%',    // 가로 너비
+                    height: '49%',   // 세로 높이 (약 1.48 비율)
+                    // ▲▲▲▲▲ [유지] ▲▲▲▲▲
 
-                    top: '28%',      // [수정] 이미지 상단에서 얼마나 내려올지 (예: 25% ~ 30%)
-                    left: '17%',     // [수정] 이미지 왼쪽에서 얼마나 떨어질지 (예: 10% ~ 15%)
-                    width: '47%',    // [수정] 화면 영역의 가로 너비 (예: 70% ~ 80%)
-                    height: '54%',   // [수정] 화면 영역의 세로 높이 (예: 40% ~ 50%)
-
-                    // ▲▲▲▲▲ [조정 끝] ▲▲▲▲▲
-
-                    borderRadius: '4px', // 화면 모서리가 둥글다면 추가
+                    borderRadius: '4px',
                 }}>
-                    {/* [수정] onLoadedData 핸들러 추가 */}
+                    {/* onLoadedData 핸들러 추가 */}
                     <video ref={videoRef} onLoadedData={handleVideoLoaded} style={{ display: 'none' }} />
 
-                    {/* [수정] 캔버스 width/height를 동적 상태로 연결 */}
+                    {/* 캔버스 width/height를 동적 상태로 연결 */}
                     <canvas
                         ref={canvasRef}
                         width={videoDimensions.width}
@@ -200,7 +238,7 @@ const CameraScreen = ({ onCaptureComplete }) => {
 
             {/* --- [2] 컨트롤 영역 (스냅 버튼 & 카운터) --- */}
             <div style={{
-                marginTop: '30px', // 카메라 이미지와 버튼 사이 간격
+                marginTop: '30px',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
