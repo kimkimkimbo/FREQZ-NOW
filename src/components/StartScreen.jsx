@@ -52,7 +52,11 @@ const StartScreen = ({ onStart }) => {
                         lineHeight: '1.5'
                     }}>
                         앱 설치 없이 바로 경험<br />
-                        <strong>12월, 웹에서 가장 먼저 FREQZ light를 만나보세요!</strong>
+                        <strong>12월, 가장 먼저 FREQZ light를 만나보세요!</strong>
+                        <br />
+                        <strong>Try it instantly with no app installation required.</strong>
+                        <br />
+                        <strong>Experience FREQZ light for the first time in December!</strong>
                     </p>
 
                     <button
@@ -62,7 +66,7 @@ const StartScreen = ({ onStart }) => {
                             padding: '16px 50px',
                             fontSize: '1.5rem',
                             color: 'var(--color-bg-main)',
-                            border: 'none', // 기본 테두리 제거 (필요시 주석 해제)
+                            border: 'none',
                             cursor: 'pointer',
                             fontWeight: 'bold',
                             marginTop: '10px',
@@ -78,6 +82,47 @@ const StartScreen = ({ onStart }) => {
                 </div>
             </div>
 
+
+            {/* Social Media Links */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px', marginBottom: '20px' }}>
+                <a href="https://www.instagram.com/freqz.kr/" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                    <button style={{
+                        background: 'rgba(0,0,0,0.5)',
+                        border: '1px solid white',
+                        color: 'white',
+                        borderRadius: '50%',
+                        width: '45px',  // Reduced size for "head"
+                        height: '45px',
+                        fontSize: '12px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 'bold'
+                    }}>
+                        ig
+                    </button>
+                </a>
+                <a href="https://www.tiktok.com/@freqz6" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                    <button style={{
+                        background: 'rgba(0,0,0,0.5)',
+                        border: '1px solid white',
+                        color: 'white',
+                        borderRadius: '50%',
+                        width: '60px', // Larger size for "body"
+                        height: '60px',
+                        fontSize: '14px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 'bold'
+                    }}>
+                        TikTok
+                    </button>
+                </a>
+            </div>
+
             {/* 2. 하단 푸터 영역 (개인정보 문구) */}
             <div style={{
                 paddingBottom: '20px', // 바닥과의 여백
@@ -87,9 +132,10 @@ const StartScreen = ({ onStart }) => {
                 width: '100%'
             }}>
                 <p>FREQZ 포토부스는 사용자의 사진 원본을 서버에 저장하지 않습니다.</p>
+                <p>FREQZ Photobooth does not store users’ original photos on the server.</p>
                 <p style={{ fontSize: '0.7rem', marginTop: '5px' }}>글꼴 출처: 부크크명조 (눈누)</p>
             </div>
-        </div>
+        </div >
     );
 };
 

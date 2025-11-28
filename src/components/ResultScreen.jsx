@@ -72,10 +72,10 @@ const ResultScreen = ({ photos, onRestart }) => {
   return (
     <div className="result-screen" style={{ textAlign: 'center', paddingBottom: '50px', color: 'var(--color-text-main)' }}>
       <h4 style={{ color: 'var(--color-text-main)', marginBottom: '20px' }}>12월, 웹에서 가장 먼저 FREQZ light를 만나보세요!</h4>
+      <h4 style={{ color: 'var(--color-text-main)', marginBottom: '20px' }}>Experience FREQZ light for the first time in December!</h4>
 
       {/* Preview (Visual only) */}
       <div style={{
-        // 이 CSS 설정값에 맞춰 Canvas 설정이 조정되었습니다.
         display: 'flex', flexDirection: 'column',
         gap: '15px',
         backgroundColor: 'var(--color-frame-bg)',
@@ -133,6 +133,46 @@ const ResultScreen = ({ photos, onRestart }) => {
         >
           START AGAIN
         </button>
+      </div>
+
+      {/* Social Media Links */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px', justifyContent: 'center', marginTop: '30px' }}>
+        <a href="https://www.instagram.com/freqz.kr/" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+          <button style={{
+            background: 'rgba(0,0,0,0.5)',
+            border: '1px solid white',
+            color: 'white',
+            borderRadius: '50%',
+            width: '45px', // Reduced size
+            height: '45px',
+            fontSize: '12px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: 'bold'
+          }}>
+            ig
+          </button>
+        </a>
+        <a href="https://www.tiktok.com/@freqz6" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+          <button style={{
+            background: 'rgba(0,0,0,0.5)',
+            border: '1px solid white',
+            color: 'white',
+            borderRadius: '50%',
+            width: '60px',
+            height: '60px',
+            fontSize: '14px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: 'bold'
+          }}>
+            TikTok
+          </button>
+        </a>
       </div>
     </div>
   );
